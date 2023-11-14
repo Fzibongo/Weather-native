@@ -1,12 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet } from 'react-native';
 
 const Weather = () => {
   const [city, setCity] = useState('');
   const [weatherData, setWeatherData] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const fetchData = async () => {
     try {
+      setLoading(true);
       const apiKey = '294df0b6708e2266c157f1fa28ba0e96';
       const response = await fetch(
         `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${apiKey}`
@@ -15,12 +17,10 @@ const Weather = () => {
       setWeatherData(data);
     } catch (error) {
       console.error(error);
+    } finally {
+      setLoading(false);
     }
   };
-
-  useEffect(() => {
-    fetchData();
-  }, []);
 
   const handleInputChange = (text) => {
     setCity(text);
@@ -61,9 +61,11 @@ const Weather = () => {
         onChangeText={handleInputChange}
       />
       <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-        <Text style={{ color: 'white' }}>Get Weather</Text>
+        <Text style={{ color: 'white' }}>Get Weather</Text> 
       </TouchableOpacity>
-      {weatherData ? (
+      {loading ? (
+        <Text>Loading weather data...</Text>
+      ) : weatherData ? (
         <View style={styles.weatherInfo}>
           <Text style={{ fontSize: 20 }}>{weatherData.name}</Text>
           <Text>Temperature: {weatherData.main.temp}°C</Text>
@@ -77,9 +79,7 @@ const Weather = () => {
           <Text>Pressure: {weatherData.main.pressure}</Text>
           <Text>Wind Speed: {weatherData.wind.speed}m/s</Text>
         </View>
-      ) : (
-        <Text>Loading weather data...</Text>
-      )}
+      ) : null}
     </View>
   );
 };
